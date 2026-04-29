@@ -15,7 +15,7 @@ $functions = array(
         'description' => 'Retrieve final grades submitted to RadianceSIS.',
         'type' => 'read',
         'ajax' => true,
-        'services' => array(MOODLE_OFFICIAL_MOBILE_SERVICE, 'radiancesis'),
+        'services' => array(MOODLE_OFFICIAL_MOBILE_SERVICE, 'RadianceSIS'),
     ),
     'local_radiancesis_get_users' => array(
         'classname' => 'local_radiancesis\external\get_users',
@@ -24,7 +24,7 @@ $functions = array(
         'description' => 'Retrieve users mapped to a specific RadianceSIS organization.',
         'type' => 'read',
         'ajax' => true,
-        'services' => array('radiancesis'),
+        'services' => array('RadianceSIS'),
     ),
     'local_radiancesis_create_users' => array(
         'classname' => 'local_radiancesis\external\create_users',
@@ -33,12 +33,12 @@ $functions = array(
         'description' => 'Create users and map them to a specific RadianceSIS organization.',
         'type' => 'write',
         'ajax' => true,
-        'services' => array('radiancesis'),
+        'services' => array('RadianceSIS'),
     ),
 );
 
 $services = array(
-    'radiancesis' => array(
+    'RadianceSIS' => array(
         'shortname' => 'RadianceSIS',
         'name' => 'RadianceSIS',
         'description' => 'Service for RadianceSIS to interact with Moodle.',

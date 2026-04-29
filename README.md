@@ -41,7 +41,7 @@ To enable RadianceSIS to communicate with your Moodle site, you must provide you
 2. Navigate to **Site Administration > Server > Web Services > Manage tokens**.
 3. Click **Add**.
 4. Select the user **Radiance SIS** (`radiancesis`).
-5. Select the service **RadianceSIS Integration**.
+5. Select the service **RadianceSIS**.
 6. Click **Save changes**.
 7. Copy the generated token and provide it to your RadianceSIS administrator along with your Moodle site URL.
 

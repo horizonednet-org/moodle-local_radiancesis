@@ -9,42 +9,42 @@
 
 $functions = array(
     'local_radiancesis_get_final_grades' => array(
-        'classname'   => 'local_radiancesis\external\get_final_grades',
-        'methodname'  => 'execute',
-        'classpath'   => 'local/radiancesis/classes/external/get_final_grades.php',
+        'classname' => 'local_radiancesis\external\get_final_grades',
+        'methodname' => 'execute',
+        'classpath' => 'local/radiancesis/classes/external/get_final_grades.php',
         'description' => 'Retrieve final grades submitted to RadianceSIS.',
-        'type'        => 'read',
-        'ajax'        => true,
-        'services'    => array(MOODLE_OFFICIAL_MOBILE_SERVICE, 'radiancesis_integration'),
+        'type' => 'read',
+        'ajax' => true,
+        'services' => array(MOODLE_OFFICIAL_MOBILE_SERVICE, 'radiancesis_integration'),
     ),
     'local_radiancesis_get_users' => array(
-        'classname'   => 'local_radiancesis\external\get_users',
-        'methodname'  => 'execute',
-        'classpath'   => 'local/radiancesis/classes/external/get_users.php',
+        'classname' => 'local_radiancesis\external\get_users',
+        'methodname' => 'execute',
+        'classpath' => 'local/radiancesis/classes/external/get_users.php',
         'description' => 'Retrieve users mapped to a specific RadianceSIS organization.',
-        'type'        => 'read',
-        'ajax'        => true,
-        'services'    => array('radiancesis_integration'),
+        'type' => 'read',
+        'ajax' => true,
+        'services' => array('radiancesis_integration'),
     ),
     'local_radiancesis_create_users' => array(
-        'classname'   => 'local_radiancesis\external\create_users',
-        'methodname'  => 'execute',
-        'classpath'   => 'local/radiancesis/classes/external/create_users.php',
+        'classname' => 'local_radiancesis\external\create_users',
+        'methodname' => 'execute',
+        'classpath' => 'local/radiancesis/classes/external/create_users.php',
         'description' => 'Create users and map them to a specific RadianceSIS organization.',
-        'type'        => 'write',
-        'ajax'        => true,
-        'services'    => array('radiancesis_integration'),
+        'type' => 'write',
+        'ajax' => true,
+        'services' => array('radiancesis_integration'),
     ),
 );
 
 $services = array(
-    'radiancesis_integration' => array(
-        'shortname'   => 'radiancesis_integration',
-        'name'        => 'RadianceSIS Integration',
+    'radiancesis' => array(
+        'shortname' => 'radiancesis',
+        'name' => 'RadianceSIS',
         'description' => 'Service for RadianceSIS to interact with Moodle.',
-        'enabled'     => 1,
+        'enabled' => 1,
         'restrictedusers' => 0,
-        'functions'   => array(
+        'functions' => array(
             'core_course_create_categories',
             'core_course_create_courses',
             'core_course_get_categories',

@@ -33,7 +33,7 @@ function xmldb_local_radiancesis_install()
 
         // Generate a random complex password.
         // Needs at least 1 upper, 1 lower, 1 digit, 1 non-alphanum.
-        $password = 'Rad!' . core_user::generate_password(24) . '9#';
+        $password = 'Rad!' . generate_password(24) . '9#';
         $user->password = hash_internal_user_password($password);
 
         $userid = $DB->insert_record('user', $user);

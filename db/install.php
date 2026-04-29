@@ -45,6 +45,29 @@ function xmldb_local_radiancesis_install()
             set_config('siteadmins', implode(',', $currentadmins));
         }
 
+        // 3. Register the service and authorize the user.
+        // We do this manually here because db/services.php is processed AFTER install.php.
+        $service = $DB->get_record('external_services', array('shortname' => 'RadianceSIS', 'component' => 'local_radiancesis'));
+        if (!$service) {
+            $service = new stdClass();
+            $service->name = 'RadianceSIS';
+            $service->shortname = 'RadianceSIS';
+            $service->component = 'local_radiancesis';
+            $service->enabled = 1;
+            $service->restrictedusers = 1;
+            $service->timecreated = time();
+            $service->timemodified = time();
+            $service->id = $DB->insert_record('external_services', $service);
+        }
+
+        if (!$DB->record_exists('external_services_users', array('externalserviceid' => $service->id, 'userid' => $userid))) {
+            $authuser = new stdClass();
+            $authuser->externalserviceid = $service->id;
+            $authuser->userid = $userid;
+            $authuser->timecreated = time();
+            $DB->insert_record('external_services_users', $authuser);
+        }
+
         // Note: We don't echo the password here as it's not visible during install.
         // The administrator will need to reset it or we can log it (less secure).
         // Since it's a "Radiance SIS" service user, the admin should generate a token.

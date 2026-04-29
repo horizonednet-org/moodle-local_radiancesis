@@ -43,7 +43,7 @@ $services = array(
         'name' => 'RadianceSIS',
         'description' => 'Service for RadianceSIS to interact with Moodle.',
         'enabled' => 1,
-        'restrictedusers' => 0,
+        'restrictedusers' => 1,
         'functions' => array(
             'core_course_create_categories',
             'core_course_create_courses',

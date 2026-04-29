@@ -47,7 +47,7 @@ To enable RadianceSIS to communicate with your Moodle site, you must provide you
 
 ## Configuration Settings
 After installation, configure the plugin settings at:
-**Site Administration > Plugins > Local plugins > RadianceSIS Integration**
+**Site Administration > Plugins > Local plugins > RadianceSIS**
 
 - **Enable Plugin**: Turn the integration on or off globally.
 - **Organization Field**: Specify which user profile field contains the RadianceSIS organization slug.

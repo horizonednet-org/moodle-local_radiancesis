@@ -9,7 +9,7 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$string['pluginname'] = 'RadianceSIS Integration';
+$string['pluginname'] = 'RadianceSIS';
 $string['radiancesis:submitfinalgrades'] = 'Submit final grades to RadianceSIS';
 
 // Settings

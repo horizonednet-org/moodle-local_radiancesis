@@ -1,0 +1,81 @@
+<div class="radiancesis-submit-grades-container">
+    
+    {{#status_message}}
+    <div class="alert {{status_class}} mb-4">
+        {{status_message}}
+    </div>
+    {{/status_message}}
+
+    {{#hasusers}}
+        <form method="post" action="{{actionurl}}">
+            <input type="hidden" name="sesskey" value="{{sesskey}}">
+            <input type="hidden" name="id" value="{{courseid}}">
+            
+            <table class="generaltable w-100">
+                <thead>
+                    <tr>
+                        <th scope="col">Name</th>
+                        <th scope="col">Calculated Grade</th>
+                        <th scope="col">
+                            Final Grade
+                            {{^is_locked}}
+                            <button type="button" class="btn btn-sm btn-outline-secondary ml-2" onclick="autofillAllGrades()" title="Autofill all from Calculated Grade">
+                                <i class="fa fa-magic"></i> Autofill
+                            </button>
+                            {{/is_locked}}
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{#users}}
+                        <tr>
+                            <td><a href="{{reporturl}}" target="_blank">{{fullname}}</a></td>
+                            <td class="calculated-grade-cell" id="calc_grade_{{id}}">{{calculatedgrade}}</td>
+                            <td>
+                                <input type="text" name="grades[{{id}}][grade]" id="final_grade_{{id}}" value="{{currentgrade}}" class="form-control d-inline-block" style="max-width: 150px;" {{#is_locked}}readonly{{/is_locked}}>
+                                {{^is_locked}}
+                                <button type="button" class="btn btn-sm btn-outline-secondary ml-1" onclick="autofillGrade({{id}})" title="Autofill from Calculated Grade">
+                                    <i class="fa fa-arrow-left"></i>
+                                </button>
+                                {{/is_locked}}
+                            </td>
+                        </tr>
+                    {{/users}}
+                </tbody>
+            </table>
+            
+            <div class="mt-4">
+                {{#can_save}}
+                    <button type="submit" name="action" value="save" class="btn btn-secondary mr-2">Save Final Grades</button>
+                {{/can_save}}
+                {{#can_submit}}
+                    <button type="submit" name="action" value="submit" class="btn btn-primary mr-2">Submit Final Grades</button>
+                {{/can_submit}}
+                {{#can_cancel}}
+                    <button type="submit" name="action" value="cancel" class="btn btn-warning">Cancel Submission</button>
+                {{/can_cancel}}
+            </div>
+        </form>
+
+        <script>
+            function autofillGrade(userid) {
+                var calcCell = document.getElementById('calc_grade_' + userid);
+                var finalInput = document.getElementById('final_grade_' + userid);
+                if (calcCell && finalInput) {
+                    finalInput.value = calcCell.innerText.trim();
+                }
+            }
+
+            function autofillAllGrades() {
+                {{#users}}
+                autofillGrade({{id}});
+                {{/users}}
+            }
+        </script>
+    {{/hasusers}}
+    {{^hasusers}}
+        <div class="alert alert-info">
+            {{#str}} nogradesfound, local_radiancesis {{/str}}
+        </div>
+    {{/hasusers}}
+</div>

@@ -39,7 +39,7 @@ $functions = array(
 
 $services = array(
     'radiancesis' => array(
-        'shortname' => 'radiancesis',
+        'shortname' => 'RadianceSIS',
         'name' => 'RadianceSIS',
         'description' => 'Service for RadianceSIS to interact with Moodle.',
         'enabled' => 1,

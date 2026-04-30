@@ -59,3 +59,4 @@ $string['eventfinalgradessaved'] = 'Final grades saved';
 $string['eventfinalgradessubmitted'] = 'Final grades submitted';
 $string['eventfinalgradessubmissioncancelled'] = 'Final grades submission cancelled';
 $string['eventfinalgradesretrieved'] = 'Final grades retrieved';
+$string['feedback'] = 'Feedback';

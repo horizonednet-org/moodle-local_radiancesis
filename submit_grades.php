@@ -61,6 +61,7 @@ if (data_submitted() && confirm_sesskey()) {
     foreach ($submittedgrades as $userid => $gradedata) {
         $userid = clean_param($userid, PARAM_INT);
         $gradevalue = clean_param($gradedata['grade'] ?? '', PARAM_RAW);
+        $feedbackvalue = clean_param($gradedata['feedback'] ?? '', PARAM_TEXT);
         
         // Fetch the user to get their idnumber.
         $student = $DB->get_record('user', array('id' => $userid), 'id, idnumber', MUST_EXIST);
@@ -74,6 +75,7 @@ if (data_submitted() && confirm_sesskey()) {
             if ($record->status != 2) {
                 if ($action != 'cancel') {
                     $record->grade = $gradevalue;
+                    $record->feedback = $feedbackvalue;
                 }
                 $record->timemodified = $now;
                 $record->status = $newstatus;
@@ -87,11 +89,12 @@ if (data_submitted() && confirm_sesskey()) {
                 $DB->update_record('local_radiancesis_final_grades', $record);
             }
         } else {
-            if ($gradevalue !== '') {
+            if ($gradevalue !== '' || $feedbackvalue !== '') {
                 $newrecord = new stdClass();
                 $newrecord->courseid = $courseid;
                 $newrecord->studentidnumber = $studentidnumber;
                 $newrecord->grade = $gradevalue;
+                $newrecord->feedback = $feedbackvalue;
                 $newrecord->timecreated = $now;
                 $newrecord->timemodified = $now;
                 $newrecord->status = $newstatus;
@@ -134,7 +137,7 @@ if (data_submitted() && confirm_sesskey()) {
 $gradableusers = \grade_report::get_gradable_users($courseid);
 $course_item = grade_item::fetch_course_item($courseid);
 
-$savedgrades = $DB->get_records('local_radiancesis_final_grades', array('courseid' => $courseid), '', 'studentidnumber, grade, status, timesubmitted, timeretrieved, timemodified');
+$savedgrades = $DB->get_records('local_radiancesis_final_grades', array('courseid' => $courseid), '', 'studentidnumber, grade, feedback, status, timesubmitted, timeretrieved, timemodified');
 
 // Determine overall status
 $has_saved = false;
@@ -204,11 +207,13 @@ if ($gradableusers) {
 
         $sid = !empty($user->idnumber) ? $user->idnumber : (string)$user->id;
         $currentgrade = isset($savedgrades[$sid]) ? $savedgrades[$sid]->grade : '';
+        $currentfeedback = isset($savedgrades[$sid]) ? $savedgrades[$sid]->feedback : '';
         $usersdata[] = array(
             'id' => $user->id,
             'fullname' => fullname($user),
             'calculatedgrade' => $calculated_grade,
             'currentgrade' => $currentgrade,
+            'currentfeedback' => $currentfeedback,
             'reporturl' => (new moodle_url('/grade/report/user/index.php', ['id' => $courseid, 'userid' => $user->id]))->out(false)
         );
     }

@@ -24,6 +24,7 @@
                             </button>
                             {{/is_locked}}
                         </th>
+                        <th scope="col">{{#str}} feedback, local_radiancesis {{/str}}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -38,6 +39,9 @@
                                     <i class="fa fa-arrow-left"></i>
                                 </button>
                                 {{/is_locked}}
+                            </td>
+                            <td>
+                                <textarea name="grades[{{id}}][feedback]" class="form-control" rows="2" style="width: 100%; min-width: 200px;" {{#is_locked}}readonly{{/is_locked}}>{{currentfeedback}}</textarea>
                             </td>
                         </tr>
                     {{/users}}

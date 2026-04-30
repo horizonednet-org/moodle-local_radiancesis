@@ -33,7 +33,8 @@ class get_final_grades extends external_api {
     public static function execute_parameters() {
         return new external_function_parameters(
             array(
-                'courseid' => new external_value(PARAM_INT, 'ID of the course', VALUE_REQUIRED)
+                'orgslug' => new external_value(PARAM_RAW, 'Organization slug to retrieve grades for', VALUE_REQUIRED),
+                'status'  => new external_value(PARAM_INT, 'Status to filter by (0 = saved, 1 = submitted, 2 = retrieved)', VALUE_DEFAULT, 1)
             )
         );
     }
@@ -41,47 +42,65 @@ class get_final_grades extends external_api {
     /**
      * Returns final grades for a course that have been submitted.
      *
-     * @param int $courseid
+     * @param int $orgslug
      * @return array
      */
-    public static function execute($courseid) {
+    public static function execute($orgslug, $status = 1) {
         global $DB;
 
         // Validate parameters.
         $params = self::validate_parameters(self::execute_parameters(), array(
-            'courseid' => $courseid
+            'orgslug' => $orgslug,
+            'status'  => $status
         ));
 
-        // Context validation.
-        $context = context_course::instance($params['courseid']);
+        // System context validation.
+        $context = \context_system::instance();
         self::validate_context($context);
 
-        // Require capability to view all grades in the course.
         require_capability('moodle/grade:viewall', $context);
 
-        // Check if plugin is enabled.
         if (!get_config('local_radiancesis', 'enableplugin')) {
             throw new \moodle_exception('error_plugin_disabled', 'local_radiancesis');
         }
 
-        // Fetch grades.
-        $records = $DB->get_records('local_radiancesis_final_grades', array('courseid' => $params['courseid']));
+        // Fetch grades with the requested status (case-insensitive for orgslug).
+        $sql = "SELECT * FROM {local_radiancesis_final_grades} 
+                 WHERE " . $DB->sql_compare_text('orgslug') . " = " . $DB->sql_compare_text(':orgslug') . " 
+                   AND status = :status";
+        $records = $DB->get_records_sql($sql, array(
+            'orgslug' => $params['orgslug'],
+            'status'  => $params['status']
+        ));
 
+        $now = time();
         $grades = array();
         foreach ($records as $record) {
             $grades[] = array(
-                'userid'       => $record->userid,
-                'grade'        => $record->grade,
-                'feedback'     => $record->feedback,
-                'timecreated'  => $record->timecreated,
-                'timemodified' => $record->timemodified,
-                'status'       => $record->status
+                'courseid'        => $record->courseid,
+                'studentidnumber' => $record->studentidnumber,
+                'grade'           => $record->grade,
+                'feedback'        => $record->feedback,
+                'timecreated'     => $record->timecreated,
+                'timemodified'    => $record->timemodified,
+                'timesubmitted'   => $record->timesubmitted,
+                'status'          => ($params['status'] == 1) ? 2 : $record->status
             );
+
+            // Only transition records if we are pulling 'submitted' grades (status 1).
+            if ($params['status'] == 1) {
+                $updaterecord = new \stdClass();
+                $updaterecord->id = $record->id;
+                $updaterecord->status = 2;
+                $updaterecord->timeretrieved = $now;
+                $updaterecord->timemodified = $now;
+                $DB->update_record('local_radiancesis_final_grades', $updaterecord);
+            }
         }
 
         return array(
-            'courseid' => $params['courseid'],
-            'grades'   => $grades
+            'orgslug' => $params['orgslug'],
+            'grades'  => $grades
         );
     }
 
@@ -93,16 +112,18 @@ class get_final_grades extends external_api {
     public static function execute_returns() {
         return new external_single_structure(
             array(
-                'courseid' => new external_value(PARAM_INT, 'Course ID'),
+                'orgslug' => new external_value(PARAM_RAW, 'Organization Slug'),
                 'grades' => new external_multiple_structure(
                     new external_single_structure(
                         array(
-                            'userid'       => new external_value(PARAM_INT, 'User ID'),
-                            'grade'        => new external_value(PARAM_RAW, 'Final grade value', VALUE_OPTIONAL),
-                            'feedback'     => new external_value(PARAM_RAW, 'Optional feedback', VALUE_OPTIONAL),
-                            'timecreated'  => new external_value(PARAM_INT, 'Time created'),
-                            'timemodified' => new external_value(PARAM_INT, 'Time modified'),
-                            'status'       => new external_value(PARAM_INT, 'Status (0 = pending, 1 = retrieved)')
+                            'courseid'        => new external_value(PARAM_INT, 'Course ID'),
+                            'studentidnumber' => new external_value(PARAM_RAW, 'RadianceSIS student ID (idnumber)'),
+                            'grade'           => new external_value(PARAM_RAW, 'Final grade value', VALUE_OPTIONAL),
+                            'feedback'        => new external_value(PARAM_RAW, 'Optional feedback', VALUE_OPTIONAL),
+                            'timecreated'     => new external_value(PARAM_INT, 'Time created'),
+                            'timemodified'    => new external_value(PARAM_INT, 'Time modified'),
+                            'timesubmitted'   => new external_value(PARAM_INT, 'Time submitted'),
+                            'status'          => new external_value(PARAM_INT, 'Status (0 = saved, 1 = submitted, 2 = retrieved)')
                         )
                     ),
                     'List of grades'

@@ -62,7 +62,13 @@ if (data_submitted() && confirm_sesskey()) {
         $userid = clean_param($userid, PARAM_INT);
         $gradevalue = clean_param($gradedata['grade'] ?? '', PARAM_RAW);
         
-        $record = $DB->get_record('local_radiancesis_final_grades', array('courseid' => $courseid, 'userid' => $userid));
+        // Fetch the user to get their idnumber.
+        $student = $DB->get_record('user', array('id' => $userid), 'id, idnumber', MUST_EXIST);
+        
+        // Use idnumber if available, otherwise fallback to the internal Moodle ID.
+        $studentidnumber = !empty($student->idnumber) ? $student->idnumber : (string)$student->id;
+
+        $record = $DB->get_record('local_radiancesis_final_grades', array('courseid' => $courseid, 'studentidnumber' => $studentidnumber));
         
         if ($record) {
             if ($record->status != 2) {
@@ -84,7 +90,7 @@ if (data_submitted() && confirm_sesskey()) {
             if ($gradevalue !== '') {
                 $newrecord = new stdClass();
                 $newrecord->courseid = $courseid;
-                $newrecord->userid = $userid;
+                $newrecord->studentidnumber = $studentidnumber;
                 $newrecord->grade = $gradevalue;
                 $newrecord->timecreated = $now;
                 $newrecord->timemodified = $now;
@@ -112,7 +118,7 @@ if (data_submitted() && confirm_sesskey()) {
 $gradableusers = \grade_report::get_gradable_users($courseid);
 $course_item = grade_item::fetch_course_item($courseid);
 
-$savedgrades = $DB->get_records('local_radiancesis_final_grades', array('courseid' => $courseid), '', 'userid, grade, status, timesubmitted, timeretrieved, timemodified');
+$savedgrades = $DB->get_records('local_radiancesis_final_grades', array('courseid' => $courseid), '', 'studentidnumber, grade, status, timesubmitted, timeretrieved, timemodified');
 
 // Determine overall status
 $has_saved = false;
@@ -128,8 +134,8 @@ if ($savedgrades) {
         if ($sg->status == 1) $has_submitted = true;
         if ($sg->status == 2) $has_synced = true;
         $last_saved = max($last_saved, $sg->timemodified);
-        $last_submitted = max($last_submitted, $sg->timesubmitted);
-        $last_retrieved = max($last_retrieved, $sg->timeretrieved);
+        $last_submitted = max($last_submitted, ($sg->timesubmitted ?? 0));
+        $last_retrieved = max($last_retrieved, ($sg->timeretrieved ?? 0));
     }
 }
 
@@ -180,7 +186,8 @@ if ($gradableusers) {
             $calculated_grade = grade_format_gradevalue($grade_grade->finalgrade, $course_item, true, GRADE_DISPLAY_TYPE_REAL, 2);
         }
 
-        $currentgrade = isset($savedgrades[$user->id]) ? $savedgrades[$user->id]->grade : '';
+        $sid = !empty($user->idnumber) ? $user->idnumber : (string)$user->id;
+        $currentgrade = isset($savedgrades[$sid]) ? $savedgrades[$sid]->grade : '';
         $usersdata[] = array(
             'id' => $user->id,
             'fullname' => fullname($user),

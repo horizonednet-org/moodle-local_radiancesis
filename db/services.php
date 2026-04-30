@@ -35,6 +35,15 @@ $functions = array(
         'ajax' => true,
         'services' => array('RadianceSIS'),
     ),
+    'local_radiancesis_update_users' => array(
+        'classname' => 'local_radiancesis\external\update_users',
+        'methodname' => 'execute',
+        'classpath' => 'local/radiancesis/classes/external/update_users.php',
+        'description' => 'Update users and map them to a specific RadianceSIS organization.',
+        'type' => 'write',
+        'ajax' => true,
+        'services' => array('RadianceSIS'),
+    ),
 );
 
 $services = array(
@@ -53,22 +62,16 @@ $services = array(
             'core_course_update_courses',
             'core_enrol_get_enrolled_users',
             'core_enrol_get_users_courses',
-            'core_enrol_unenrol_user_enrolment',
             'core_grades_get_gradable_users',
-            'core_user_create_users',
-            'core_user_get_users',
-            'core_user_get_users_by_field',
-            'core_user_search_identity',
             'core_user_update_users',
             'core_webservice_get_site_info',
             'enrol_manual_enrol_users',
             'enrol_manual_unenrol_users',
-            'enrol_meta_add_instances',
-            'enrol_meta_delete_instances',
             'gradereport_overview_get_course_grades',
             'local_radiancesis_get_final_grades',
             'local_radiancesis_get_users',
-            'local_radiancesis_create_users'
+            'local_radiancesis_create_users',
+            'local_radiancesis_update_users'
         ),
     ),
 );

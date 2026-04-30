@@ -1,6 +1,6 @@
 <?php
 /**
- * External API for creating users with organization mapping.
+ * External API for updating users with organization mapping.
  *
  * @package    local_radiancesis
  * @copyright  2026 Horizon Education Network
@@ -20,9 +20,9 @@ use external_function_parameters;
 use external_value;
 
 /**
- * External API for creating users.
+ * External API for updating users.
  */
-class create_users extends external_api {
+class update_users extends external_api {
 
     /**
      * Returns description of method parameters
@@ -30,7 +30,7 @@ class create_users extends external_api {
      * @return external_function_parameters
      */
     public static function execute_parameters() {
-        $core_params = \core_user_external::create_users_parameters();
+        $core_params = \core_user_external::update_users_parameters();
         
         // Force idnumber to be required in the user structure.
         $user_structure = $core_params->keys['users']->content;
@@ -44,11 +44,11 @@ class create_users extends external_api {
     }
 
     /**
-     * Creates users.
+     * Updates users.
      *
      * @param string $orgslug
      * @param array $users
-     * @return array
+     * @return null
      */
     public static function execute($orgslug, $users) {
         $params = self::validate_parameters(self::execute_parameters(), array(
@@ -56,12 +56,9 @@ class create_users extends external_api {
             'users' => $users
         ));
 
-        // core_user_external::create_users handles capability and context checks
-        // via require_capability('moodle/user:create', ...).
-
         $orgfield = get_config('local_radiancesis', 'orgfield');
         if (empty($orgfield)) {
-            $orgfield = 'idnumber'; // fallback
+            $orgfield = 'idnumber';
         }
 
         $is_core_field = in_array($orgfield, ['idnumber', 'institution', 'department']);
@@ -70,20 +67,16 @@ class create_users extends external_api {
 
         foreach ($modified_users as &$user) {
             if ($is_core_field) {
-                // Set the core field directly.
                 $user[$orgfield] = $params['orgslug'];
             } else {
-                // Set the custom profile field.
                 $shortname = str_replace('profile_field_', '', $orgfield);
                 
                 if (!isset($user['customfields'])) {
                     $user['customfields'] = array();
                 }
                 
-                // Check if the field is already provided; if so, overwrite it.
                 $found = false;
                 foreach ($user['customfields'] as &$cf) {
-                    // Moodle core API expects 'type' as the shortname for custom profile fields.
                     if ($cf['type'] === $shortname) {
                         $cf['value'] = $params['orgslug'];
                         $found = true;
@@ -100,15 +93,15 @@ class create_users extends external_api {
             }
         }
 
-        return \core_user_external::create_users($modified_users);
+        return \core_user_external::update_users($modified_users);
     }
 
     /**
      * Returns description of method result value
      *
-     * @return \external_multiple_structure
+     * @return null
      */
     public static function execute_returns() {
-        return \core_user_external::create_users_returns();
+        return \core_user_external::update_users_returns();
     }
 }

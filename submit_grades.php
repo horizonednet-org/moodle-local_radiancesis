@@ -105,6 +105,22 @@ if (data_submitted() && confirm_sesskey()) {
         }
     }
     
+    // Trigger events based on action.
+    $eventparams = array(
+        'context' => $context,
+        'courseid' => $courseid,
+    );
+    if ($action == 'submit') {
+        $event = \local_radiancesis\event\final_grades_submitted::create($eventparams);
+        $event->trigger();
+    } elseif ($action == 'cancel') {
+        $event = \local_radiancesis\event\final_grades_submission_cancelled::create($eventparams);
+        $event->trigger();
+    } else {
+        $event = \local_radiancesis\event\final_grades_saved::create($eventparams);
+        $event->trigger();
+    }
+
     if ($action == 'submit' && get_config('local_radiancesis', 'enablewebhook')) {
         $task = new \local_radiancesis\task\send_webhook_task();
         $task->set_custom_data(array('courseid' => $courseid));

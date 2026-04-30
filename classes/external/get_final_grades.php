@@ -98,6 +98,13 @@ class get_final_grades extends external_api {
             }
         }
 
+        // Trigger event.
+        $event = \local_radiancesis\event\final_grades_retrieved::create(array(
+            'context' => \context_system::instance(),
+            'other' => array('orgslug' => $params['orgslug'])
+        ));
+        $event->trigger();
+
         return array(
             'orgslug' => $params['orgslug'],
             'grades'  => $grades

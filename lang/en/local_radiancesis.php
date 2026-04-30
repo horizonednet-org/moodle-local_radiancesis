@@ -53,3 +53,9 @@ $string['status'] = 'Status';
 $string['timesubmitted'] = 'Time Submitted';
 $string['timeretrieved'] = 'Time Retrieved';
 $string['savedby'] = 'Saved/Submitted By';
+
+// Events
+$string['eventfinalgradessaved'] = 'Final grades saved';
+$string['eventfinalgradessubmitted'] = 'Final grades submitted';
+$string['eventfinalgradessubmissioncancelled'] = 'Final grades submission cancelled';
+$string['eventfinalgradesretrieved'] = 'Final grades retrieved';

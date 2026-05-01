@@ -68,58 +68,42 @@ class get_users extends external_api {
 
         $orgfield = get_config('local_radiancesis', 'orgfield');
         if (empty($orgfield)) {
-            $orgfield = 'idnumber'; // fallback
+            $orgfield = 'department'; // fallback
         }
 
         $core_criteria = $params['criteria'];
-
-        $is_core_field = in_array($orgfield, ['idnumber', 'institution', 'department']);
+        $is_core_field = in_array($orgfield, ['institution', 'department']);
         
         // core_user_external::get_users only supports a limited set of criteria fields.
-        // We can only offload 'idnumber' filtering to the DB.
-        if ($is_core_field && $orgfield === 'idnumber') {
-            $core_criteria[] = array(
-                'key' => 'idnumber',
-                'value' => $params['orgslug']
-            );
-            $is_core_field_supported = true;
-        } else {
-            $is_core_field_supported = false;
-        }
-
-        // Delegate to core Moodle function.
+        // It does NOT support 'institution' or 'department', so we filter in memory.
         $result = \core_user_external::get_users($core_criteria);
 
-        // If the configured field is a custom profile field or a core field not supported
-        // in $criteria (like institution), filter in memory.
-        if (!$is_core_field_supported) {
-            $filtered_users = array();
-            foreach ($result['users'] as $user) {
-                $match = false;
-                
-                if ($is_core_field) {
-                    if (isset($user[$orgfield]) && $user[$orgfield] === $params['orgslug']) {
-                        $match = true;
-                    }
-                } else {
-                    $shortname = str_replace('profile_field_', '', $orgfield);
-                    if (!empty($user['customfields'])) {
-                        foreach ($user['customfields'] as $cf) {
-                            // Moodle core API returns 'shortname' in the customfields array.
-                            if ($cf['shortname'] === $shortname && $cf['value'] === $params['orgslug']) {
-                                $match = true;
-                                break;
-                            }
+        $filtered_users = array();
+        foreach ($result['users'] as $user) {
+            $match = false;
+            
+            if ($is_core_field) {
+                if (isset($user[$orgfield]) && $user[$orgfield] === $params['orgslug']) {
+                    $match = true;
+                }
+            } else {
+                $shortname = str_replace('profile_field_', '', $orgfield);
+                if (!empty($user['customfields'])) {
+                    foreach ($user['customfields'] as $cf) {
+                        // Moodle core API returns 'shortname' in the customfields array.
+                        if ($cf['shortname'] === $shortname && $cf['value'] === $params['orgslug']) {
+                            $match = true;
+                            break;
                         }
                     }
                 }
-                
-                if ($match) {
-                    $filtered_users[] = $user;
-                }
             }
-            $result['users'] = $filtered_users;
+            
+            if ($match) {
+                $filtered_users[] = $user;
+            }
         }
+        $result['users'] = $filtered_users;
 
         return $result;
     }

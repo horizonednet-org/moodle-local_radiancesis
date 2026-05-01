@@ -61,10 +61,10 @@ class create_users extends external_api {
 
         $orgfield = get_config('local_radiancesis', 'orgfield');
         if (empty($orgfield)) {
-            $orgfield = 'idnumber'; // fallback
+            $orgfield = 'department'; // fallback
         }
 
-        $is_core_field = in_array($orgfield, ['idnumber', 'institution', 'department']);
+        $is_core_field = in_array($orgfield, ['institution', 'department']);
         
         $modified_users = $params['users'];
 

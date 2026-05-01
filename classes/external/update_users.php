@@ -24,11 +24,6 @@ use external_value;
  */
 class update_users extends external_api {
 
-    /**
-     * Returns description of method parameters
-     *
-     * @return external_function_parameters
-     */
     public static function execute_parameters() {
         $core_params = \core_user_external::update_users_parameters();
         
@@ -36,6 +31,9 @@ class update_users extends external_api {
         $user_structure = $core_params->keys['users']->content;
         $user_structure->keys['idnumber']->allownull = false;
         $user_structure->keys['idnumber']->required = VALUE_REQUIRED;
+        
+        // Make id optional because we can look it up via idnumber.
+        $user_structure->keys['id']->required = VALUE_OPTIONAL;
 
         return new external_function_parameters(array(
             'orgslug' => new external_value(PARAM_RAW, 'RadianceSIS organization slug', VALUE_REQUIRED),
@@ -51,6 +49,8 @@ class update_users extends external_api {
      * @return null
      */
     public static function execute($orgslug, $users) {
+        global $DB;
+
         $params = self::validate_parameters(self::execute_parameters(), array(
             'orgslug' => $orgslug,
             'users' => $users
@@ -58,14 +58,23 @@ class update_users extends external_api {
 
         $orgfield = get_config('local_radiancesis', 'orgfield');
         if (empty($orgfield)) {
-            $orgfield = 'idnumber';
+            $orgfield = 'department';
         }
 
-        $is_core_field = in_array($orgfield, ['idnumber', 'institution', 'department']);
+        $is_core_field = in_array($orgfield, ['institution', 'department']);
         
         $modified_users = $params['users'];
 
         foreach ($modified_users as &$user) {
+            // Resolve Moodle ID via idnumber if not provided.
+            if (empty($user['id'])) {
+                $moodle_user = $DB->get_record('user', array('idnumber' => $user['idnumber']), 'id');
+                if (!$moodle_user) {
+                    throw new \invalid_parameter_exception('User with idnumber ' . $user['idnumber'] . ' not found.');
+                }
+                $user['id'] = $moodle_user->id;
+            }
+
             if ($is_core_field) {
                 $user[$orgfield] = $params['orgslug'];
             } else {

@@ -73,13 +73,13 @@ if ($hassiteconfig) {
     ));
 
     $options = [
-        'idnumber' => 'idnumber (Core)',
         'institution' => 'institution (Core)',
         'department' => 'department (Core)',
     ];
 
     global $DB;
-    $customfields = $DB->get_records('user_info_field', null, 'sortorder ASC', 'id, shortname, name');
+    // Filter by datatype: 'text' (Short text) and 'menu' (Dropdown).
+    $customfields = $DB->get_records_select('user_info_field', 'datatype = ? OR datatype = ?', ['text', 'menu'], 'sortorder ASC', 'id, shortname, name');
     if ($customfields) {
         foreach ($customfields as $field) {
             $options['profile_field_' . $field->shortname] = get_string('customprofilefield', 'local_radiancesis', $field->name);
@@ -90,7 +90,7 @@ if ($hassiteconfig) {
         'local_radiancesis/orgfield',
         get_string('orgfield', 'local_radiancesis'),
         get_string('orgfield_desc', 'local_radiancesis'),
-        'idnumber',
+        'department',
         $options
     ));
 }

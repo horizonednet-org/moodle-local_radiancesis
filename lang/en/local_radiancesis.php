@@ -41,6 +41,7 @@ $string['orgfield'] = 'Organization Field';
 $string['orgfield_desc'] = 'The field that will be matched against the RadianceSIS organization SLUG.';
 $string['customprofilefield'] = 'Custom Profile Field: {$a}';
 $string['radiancesisgrades'] = 'RadianceSIS Grades';
+$string['organization'] = 'Organization';
 $string['savednotstatus'] = 'Saved (Not submitted)';
 $string['submittedpendingstatus'] = 'Submitted (Pending retrieval)';
 $string['retrievedsyncedstatus'] = 'Retrieved (Synced)';

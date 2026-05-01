@@ -219,6 +219,7 @@ $sql = "SELECT c.id, c.fullname, c.shortname,
                MAX(g.timesubmitted)   AS lastsubmitted,
                MAX(g.timeretrieved)   AS lastretrieved,
                MAX(g.timemodified)    AS lasttimemodified,
+               MAX(g.orgslug)         AS orgslug,
                (SELECT u.id
                   FROM {local_radiancesis_final_grades} gsub
                   JOIN {user} u ON u.id = gsub.savedbyid
@@ -284,8 +285,9 @@ if (!empty($having)) {
 $table = new flexible_table('local-radiancesis-report');
 $table->define_baseurl($url);
 
-$columns = array('coursename', 'usercount', 'status', 'savedby', 'timesubmitted', 'timeretrieved');
+$columns = array('organization', 'coursename', 'usercount', 'status', 'savedby', 'timesubmitted', 'timeretrieved');
 $headers = array(
+    get_string('organization', 'local_radiancesis'),
     get_string('coursename', 'local_radiancesis'),
     get_string('usercount', 'local_radiancesis'),
     get_string('status', 'local_radiancesis'),
@@ -302,6 +304,7 @@ $table->setup();
 
 $sort = $table->get_sql_sort();
 if ($sort) {
+    $sort = str_replace('organization',  'orgslug',       $sort);
     $sort = str_replace('coursename',   'c.fullname',    $sort);
     $sort = str_replace('status',       'coursestatus',  $sort);
     $sort = str_replace('timesubmitted','lastsubmitted',  $sort);
@@ -336,6 +339,7 @@ if ($records) {
         }
 
         $table->add_data(array(
+            $record->orgslug,
             $courselink,
             $record->usercount,
             $badge,
